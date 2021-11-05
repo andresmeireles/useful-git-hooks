@@ -1,0 +1,28 @@
+# hook to fix style errors using ecs (easy coding standard)
+# this hook is a pre-commit
+# when using this script copy as pre-commit on folder .git/hook
+# after copy give execution permission with "chmod +x pre-commit"
+
+#!/usr/bin/env bash
+echo "start scan to find cs errors"
+
+ECS_BIN="./vendor/bin/ecs"
+HAS_ECS=false
+
+if [ -x $ECS_BIN ]; then
+  HAS_ECS=true
+fi
+
+if $HAS_ECS; then
+  echo "fix cs errors"
+  git status --porcelain | grep -e '^[AM](.*).php$' | cut -c 3- | while read line; do
+    $ECS_BIN check "$line" --fix --quiet --no-progress-bar --no-ansi
+  done
+  echo "finish fixers"
+else
+  echo ""
+  echo "cannot run ecs please install in project"
+  echo ""
+  echo "   composer require symplify/easy-coding-standard --dev    "
+  echo ""
+fi
